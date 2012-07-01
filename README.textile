@@ -14,9 +14,11 @@ The plug-in performs the following steps:
 8. Add the project.clj to the SCM system
 9. Commit the project.clj to the SCM system
 
+By default the new version is added to your local repo using lein-install. To upload to a remote repository provide 'mode remote' as argumnets to invocation.
+
 h1. Usage
 
-pre.    lein plugin install lein-release/lein-release 1.0.0
+pre.    add [lein-release "1.0.1-SNAPSHOT"] to your lein profile. See lein 2 documention for details on the new plugin system.
 
 pre.    lein release
 

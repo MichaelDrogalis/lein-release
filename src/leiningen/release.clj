@@ -11,6 +11,8 @@
 
 (def ^:dynamic config {})
 
+(def default-args {:mode :local})
+
 (def ^:dynamic *scm-systems*
      {:git {:add    ["git" "add"]
             :tag    ["git" "tag"]
@@ -61,7 +63,7 @@
 (defn set-project-version! [old-vstring new-vstring]
   (spit "project.clj" (replace-project-version old-vstring new-vstring)))
 
-(defn detect-deployment-strategy [project]
+(defn detect-remote-deployment-strategy [project]
   (cond
     (:deploy-via config)
     (:deploy-via config)
@@ -70,10 +72,16 @@
     :lein-deploy
 
     :else
-    :lein-install))
+    (raise "Unable to determine deployment strategy. Please add repositories to your projects configuration or specify :deploy-via")))
 
-(defn perform-deploy! [project project-jar]
-  (case (detect-deployment-strategy project)
+(defn detect-deployment-strategy [mode project]
+  (case mode
+    :remote (detect-remote-deployment-strategy project)
+    :lein-install)
+  )
+
+(defn perform-deploy! [mode project project-jar]
+  (case (detect-deployment-strategy mode project)
 
     :lein-deploy
     (sh! "lein" "deploy")
@@ -104,7 +112,8 @@
     (let [current-version  (get project :version)
           release-version  (.replaceAll current-version "-SNAPSHOT" "")
           next-dev-version (compute-next-development-version release-version)
-          jar-file-name    (format "%s-%s.jar" (:name project) release-version)]
+          jar-file-name    (format "%s-%s.jar" (:name project) release-version)
+          args-map (merge default-args (apply hash-map (map keyword args)))]
       (when (is-snapshot? current-version)
         (println (format "setting project version %s => %s" current-version release-version))
         (set-project-version! current-version release-version)
@@ -116,7 +125,7 @@
         (println "creating jar and pom files...")
         (sh! "lein" "jar")
         (sh! "lein" "pom"))
-      (perform-deploy! project jar-file-name)
+      (perform-deploy! (:mode args-map) project jar-file-name)
       (when-not (is-snapshot? (extract-project-version-from-file))
         (println (format "updating version %s => %s for next dev cycle" release-version next-dev-version))
         (set-project-version! release-version next-dev-version)
