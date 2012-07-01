@@ -1,6 +1,6 @@
 (defproject lein-release/lein-release "1.0.1-SNAPSHOT"
   :description "Leiningen Release Plugin"
   :dev-dependencies [[swank-clojure "1.4.2"]]
-  :eval-in :leiningen
+  :eval-in-leiningen true
   :lein-release {:deploy-via :clojars}
   :dependencies [[org.clojure/clojure "1.3.0"]])

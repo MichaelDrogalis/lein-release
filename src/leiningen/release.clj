@@ -1,4 +1,5 @@
 (ns leiningen.release
+  "The release plug-in automatically manages your project’s version and deploys the built artifact for you."
   (:require
    [clojure.java.shell :as sh]
    [clojure.string     :as string])
@@ -10,7 +11,7 @@
 
 (def ^:dynamic config {})
 
-(def *scm-systems*
+(def ^:dynamic *scm-systems*
      {:git {:add    ["git" "add"]
             :tag    ["git" "tag"]
             :commit ["git" "commit"]
@@ -24,7 +25,7 @@
      (.exists (java.io.File. ".git"))
      :git
      :no-scm-detected
-     (raise "Erorr: no scm detected! (I know only about git for now)."))))
+     (raise "Error: no scm detected! (I know only about git for now)."))))
 
 (defn sh! [& args]
   (let [res (apply sh/sh args)]
@@ -68,7 +69,7 @@
     (:repositories project)
     :lein-deploy
 
-    :no-deploy-strategy
+    :else
     :lein-install))
 
 (defn perform-deploy! [project project-jar]
@@ -121,4 +122,3 @@
         (set-project-version! release-version next-dev-version)
         (scm! :add "project.clj")
         (scm! :commit "-m" (format "lein-release plugin: bumped version from %s to %s for next developemnt cycle" release-version next-dev-version))))))
-
