@@ -129,7 +129,7 @@
     (prn "adding, committing and tagging project.clj")))
 
 (defn tag [project]
-  (let [release-version (get-release-version project)]
+  (let [release-version (:version project)]
     (scm! :commit "-am" (format "lein-release plugin: preparing %s release" release-version))
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
@@ -147,9 +147,9 @@
 (defn release [project-orig & args]
   (binding [config (merge default-config (:lein-release project-orig))]
     (let [project (update-project-map project-orig)
-          release-version  (get-release-version project)
+          release-version  (get-release-version project-orig)
           next-dev-version (compute-next-development-version release-version)  
-          jar-file-name    (format "target/%s-%s.jar" (:name project) release-version)]
+          jar-file-name    (format "target/%s-%s.jar" (:name project-orig) release-version)]
 
       (when (:original-version project)
         (update-project-file project)
