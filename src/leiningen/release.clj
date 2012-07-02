@@ -1,8 +1,9 @@
 (ns leiningen.release
   "The release plug-in automatically manages your project’s version and deploys the built artifact for you."
   (:require
-   [clojure.java.shell :as sh]
-   [clojure.string     :as string])
+   [clojure.java.shell  :as sh]
+   [clojure.string      :as string]
+   [leiningen.core.main :as main])
   (:import
    [java.util.regex Pattern]))
 
@@ -11,7 +12,7 @@
 
 (def ^:dynamic config {})
 
-(def default-args {:mode :local})
+(def default-config {:release-tasks [:jar :pom :install]})
 
 (def ^:dynamic *scm-systems*
      {:git {:add    ["git" "add"]
@@ -107,25 +108,44 @@
 (defn is-snapshot? [vstring]
   (.endsWith vstring "-SNAPSHOT"))
 
+(defn get-current-version [project]
+  (:version project))
+
+(defn get-release-version [project]
+  (.replaceAll (get-current-version project) "-SNAPSHOT" ""))
+
+
+(defn drop-snapshot [project]
+  (let [current-version (get-current-version project)
+        release-version  (get-release-version project)]
+    (prn (format "setting project version %s => %s" current-version release-version))
+    (set-project-version! current-version release-version)
+    (prn "adding, committing and tagging project.clj")))
+
+(defn tag [project]
+  (let [release-version (get-release-version project)]
+    (scm! :commit "-am" (format "lein-release plugin: preparing %s release" release-version))
+    (scm! :tag (format "%s-%s" (:name project) release-version))))
+
+(defn execute-tasks [tasks project]
+  (for [task tasks]
+    (if (vector? task)
+      (prn "haha")
+      (main/apply-task task project []))))
+
 (defn release [project & args]
-  (binding [config (or (:lein-release project) config)]
-    (let [current-version  (get project :version)
-          release-version  (.replaceAll current-version "-SNAPSHOT" "")
-          next-dev-version (compute-next-development-version release-version)
-          jar-file-name    (format "target/%s-%s.jar" (:name project) release-version)
-          args-map (merge default-args (apply hash-map (map keyword args)))]
-      (when (is-snapshot? current-version)
-        (println (format "setting project version %s => %s" current-version release-version))
-        (set-project-version! current-version release-version)
-        (println "adding, committing and tagging project.clj")
-        (scm! :add "project.clj")
-        (scm! :commit "-m" (format "lein-release plugin: preparing %s release" release-version))
-        (scm! :tag (format "%s-%s" (:name project) release-version)))
-      (when-not (.exists (java.io.File. jar-file-name))
-        (println "creating jar and pom files...")
-        (sh! "lein" "jar")
-        (sh! "lein" "pom"))
-      (perform-deploy! (:mode args-map) project jar-file-name)
+  (binding [config (merge default-config (:lein-release project))]
+    (let [release-version  (get-release-version project)
+          next-dev-version (compute-next-development-version release-version)  
+          jar-file-name    (format "target/%s-%s.jar" (:name project) release-version)]
+
+      (when (is-snapshot? (:version project))
+        (drop-snapshot project)
+        (tag project))
+
+      (execute-tasks (:release-tasks config) project)
+      
+;      (perform-deploy! (:mode args-map) project jar-file-name)
       (when-not (is-snapshot? (extract-project-version-from-file))
         (println (format "updating version %s => %s for next dev cycle" release-version next-dev-version))
         (set-project-version! release-version next-dev-version)
