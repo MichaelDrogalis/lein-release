@@ -128,6 +128,7 @@
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
 (defn execute-tasks [tasks project]
+  (prn tasks)
   (for [task tasks]
     (prn (str task))
   ;    (if (vector? task)      (prn "haha")      (main/apply-task (str task) project []))
@@ -143,7 +144,7 @@
       (when (is-snapshot? (:version project))
         (drop-snapshot project)
         (tag project))
-      (apply println (:release-tasks config))
+ 
       (execute-tasks (:release-tasks config) project)
       
 ;      (perform-deploy! (:mode args-map) project jar-file-name)
