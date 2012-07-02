@@ -129,7 +129,7 @@
 
 (defn execute-tasks [taskss project]
   (prn "hello")
-  (for [t ["asd" "asd"]] (prn t))
+  (doall (for [t ["asd" "asd"]] (prn t)))
 (prn "bye")
   ;    (if (vector? task)      (prn "haha")      (main/apply-task (str task) project []))
   )
@@ -139,7 +139,7 @@
     (let [release-version  (get-release-version project)
           next-dev-version (compute-next-development-version release-version)  
           jar-file-name    (format "target/%s-%s.jar" (:name project) release-version)]
-(for [t ["asd" "asd"]] (prn t))
+
       (when (is-snapshot? (:version project))
         (drop-snapshot project)
         (tag project))
