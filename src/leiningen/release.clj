@@ -129,7 +129,7 @@
 
 (defn execute-tasks [tasks project]
   (prn (seq tasks))
-  (for [t (seq tasks)] (prn t)
+  (for [t (count tasks)] (prn t)
   ;    (if (vector? task)      (prn "haha")      (main/apply-task (str task) project []))
     )
   )
