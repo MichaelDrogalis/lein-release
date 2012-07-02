@@ -135,9 +135,10 @@
 
 (defn execute-task [task project]
   (prn (format "applying %s to project" task))
+  (prn project)
   (if (vector? task)
     (prn "haha")
-    (main/apply-task (name task) project [])))
+    (main/apply-task (name task) project)))
 
 (defn execute-tasks [tasks project]  
   (doall
