@@ -127,12 +127,12 @@
     (scm! :commit "-am" (format "lein-release plugin: preparing %s release" release-version))
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
-(defn execute-tasks [taskss project]
-  (prn "hello")
-  (doall (for [t ["asd" "asd"]] (prn t)))
-(prn "bye")
-  ;    (if (vector? task)      (prn "haha")      (main/apply-task (str task) project []))
-  )
+(defn execute-tasks [tasks project]  
+  (doall
+   (for [task tasks]
+     (if (vector? task)
+       (prn "haha")
+       (main/apply-task (str task) project [])))))
 
 (defn release [project & args]
   (binding [config (merge default-config (:lein-release project))]
