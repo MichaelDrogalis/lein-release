@@ -143,7 +143,7 @@
       (when (is-snapshot? (:version project))
         (drop-snapshot project)
         (tag project))
-      (apply prn (:release-tasks config))
+      (apply println (:release-tasks config))
       (execute-tasks (:release-tasks config) project)
       
 ;      (perform-deploy! (:mode args-map) project jar-file-name)
