@@ -139,7 +139,7 @@
     (let [release-version  (get-release-version project)
           next-dev-version (compute-next-development-version release-version)  
           jar-file-name    (format "target/%s-%s.jar" (:name project) release-version)]
-
+(for [t ["asd" "asd"]] (prn t))
       (when (is-snapshot? (:version project))
         (drop-snapshot project)
         (tag project))
