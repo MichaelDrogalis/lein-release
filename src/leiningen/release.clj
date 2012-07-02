@@ -128,7 +128,7 @@
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
 (defn execute-tasks [tasks project]
-  (prn (seq tasks))
+  (prn (count tasks))
   (for [t (count tasks)] (prn t)
   ;    (if (vector? task)      (prn "haha")      (main/apply-task (str task) project []))
     )
