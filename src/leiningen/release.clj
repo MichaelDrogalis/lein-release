@@ -112,7 +112,7 @@
     (let [current-version  (get project :version)
           release-version  (.replaceAll current-version "-SNAPSHOT" "")
           next-dev-version (compute-next-development-version release-version)
-          jar-file-name    (format "%s-%s.jar" (:name project) release-version)
+          jar-file-name    (format "target/%s-%s.jar" (:name project) release-version)
           args-map (merge default-args (apply hash-map (map keyword args)))]
       (when (is-snapshot? current-version)
         (println (format "setting project version %s => %s" current-version release-version))
