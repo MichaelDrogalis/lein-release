@@ -129,9 +129,10 @@
 
 (defn execute-tasks [tasks project]
   (for [task tasks]
-    (if (vector? task)
-      (prn "haha")
-      (main/apply-task (str task) project []))))
+    (prn task)
+  ;    (if (vector? task)      (prn "haha")      (main/apply-task (str task) project []))
+    )
+  )
 
 (defn release [project & args]
   (binding [config (merge default-config (:lein-release project))]
