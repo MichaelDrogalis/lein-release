@@ -3,7 +3,7 @@
   (:require
    [clojure.java.shell  :as sh]
    [clojure.string      :as string]
-   [leiningen.core.main :as main])
+   [leiningen.core.main :as main :only [apply-task]])
   (:import
    [java.util.regex Pattern]))
 
