@@ -128,11 +128,10 @@
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
 (defn execute-task [task project]
-  (prn (format "apply %s to project" task))
+  (prn (format "applying %s to project" task))
   (if (vector? task)
-       (prn "haha")
-       (main/apply-task (name task) project []))
-  )
+    (prn "haha")
+    (main/apply-task (name task) project [])))
 
 (defn execute-tasks [tasks project]  
   (doall
