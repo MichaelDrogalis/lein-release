@@ -105,8 +105,8 @@
          (raise "Error: unable to find project version in file: %s" proj-file))
        (.group m 1))))
 
-(defn is-snapshot? [vstring]
-  (.endsWith vstring "-SNAPSHOT"))
+(defn is-snapshot? [project]
+  (.endsWith (:version project) "-SNAPSHOT"))
 
 (defn get-current-version [project]
   (:version project))
@@ -114,12 +114,18 @@
 (defn get-release-version [project]
   (.replaceAll (get-current-version project) "-SNAPSHOT" ""))
 
+(defn update-project-map [project]
+  (if (is-snapshot? project)
+    (merge project
+           {:version (get-release-version project)
+            :original-version (get-current-version project)})
+    project))
 
-(defn drop-snapshot [project]
-  (let [current-version (get-current-version project)
-        release-version  (get-release-version project)]
-    (prn (format "setting project version %s => %s" current-version release-version))
-    (set-project-version! current-version release-version)
+(defn update-project-file [project]
+  (let [original-version (:original-version project)
+        release-version  (:version project)]
+    (prn (format "setting project version %s => %s" original-version release-version))
+    (set-project-version! original-version release-version)
     (prn "adding, committing and tagging project.clj")))
 
 (defn tag [project]
@@ -138,14 +144,15 @@
    (for [task tasks]
      (execute-task task project))))
 
-(defn release [project & args]
-  (binding [config (merge default-config (:lein-release project))]
-    (let [release-version  (get-release-version project)
+(defn release [project-orig & args]
+  (binding [config (merge default-config (:lein-release project-orig))]
+    (let [project (update-project-map project-orig)
+          release-version  (get-release-version project)
           next-dev-version (compute-next-development-version release-version)  
           jar-file-name    (format "target/%s-%s.jar" (:name project) release-version)]
 
-      (when (is-snapshot? (:version project))
-        (drop-snapshot project)
+      (when (:original-version project)
+        (update-project-file project)
         (tag project))
  
       (execute-tasks (:release-tasks config) project)
@@ -155,4 +162,4 @@
         (println (format "updating version %s => %s for next dev cycle" release-version next-dev-version))
         (set-project-version! release-version next-dev-version)
         (scm! :add "project.clj")
-        (scm! :commit "-m" (format "lein-release plugin: bumped version from %s to %s for next developemnt cycle" release-version next-dev-version))))))
+        (scm! :commit "-m" (format "lein-release plugin: bumped version from %s to %s for next development cycle" release-version next-dev-version))))))
