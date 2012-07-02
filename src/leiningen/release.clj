@@ -131,7 +131,7 @@
   (for [task tasks]
     (if (vector? task)
       (prn "haha")
-      (main/apply-task task project []))))
+      (main/apply-task (str task) project []))))
 
 (defn release [project & args]
   (binding [config (merge default-config (:lein-release project))]
