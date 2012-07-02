@@ -135,10 +135,9 @@
 
 (defn execute-task [task project]
   (prn (format "applying %s to project" task))
-  (prn project)
   (if (vector? task)
     (prn "haha")
-    (main/apply-task (name task) project)))
+    (main/apply-task (name task) project nil)))
 
 (defn execute-tasks [tasks project]  
   (doall
@@ -159,8 +158,8 @@
       (execute-tasks (:release-tasks config) project)
       
 ;      (perform-deploy! (:mode args-map) project jar-file-name)
-      (when-not (is-snapshot? (extract-project-version-from-file))
-        (println (format "updating version %s => %s for next dev cycle" release-version next-dev-version))
-        (set-project-version! release-version next-dev-version)
-        (scm! :add "project.clj")
-        (scm! :commit "-m" (format "lein-release plugin: bumped version from %s to %s for next development cycle" release-version next-dev-version))))))
+      
+      (println (format "updating version %s => %s for next dev cycle" release-version next-dev-version))
+      (set-project-version! release-version next-dev-version)
+      (scm! :add "project.clj")
+      (scm! :commit "-m" (format "lein-release plugin: bumped version from %s to %s for next development cycle" release-version next-dev-version)))))
