@@ -1,4 +1,4 @@
-(defproject lein-release/lein-release "1.0.34"
+(defproject lein-release/lein-release "1.0.35-SNAPSHOT"
   :description "Leiningen Release Plugin"
   :dev-dependencies [[swank-clojure "1.4.2"]]
   :eval-in-leiningen true
