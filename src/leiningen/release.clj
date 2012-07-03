@@ -118,7 +118,8 @@
   (if (is-snapshot? project)
     (merge project
            {:version (get-release-version project)
-            :original-version (get-current-version project)})
+            :original-version (get-current-version project)
+            :jar-name "theJar"})
     project))
 
 (defn update-project-file [project]
