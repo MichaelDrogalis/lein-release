@@ -48,7 +48,7 @@
   (let [parts             (vec (.split current-version "\\."))
         version-parts     (vec (take (dec (count parts)) parts))
         minor-version     (last parts)
-        new-minor-version (str (inc (Integer/parseInt minor-version)) "-SNAPSHOT")]
+        new-minor-version (str (inc (Integer/parseInt minor-version)) "-SNAP")]
     (string/join "." (conj version-parts new-minor-version))))
 
 (defn replace-project-version [old-vstring new-vstring]
@@ -106,13 +106,13 @@
        (.group m 1))))
 
 (defn is-snapshot? [project]
-  (.endsWith (:version project) "-SNAPSHOT"))
+  (.endsWith (:version project) "-SNAP"))
 
 (defn get-current-version [project]
   (:version project))
 
 (defn get-release-version [project]
-  (.replaceAll (get-current-version project) "-SNAPSHOT" ""))
+  (.replaceAll (get-current-version project) "-SNAP" ""))
 
 (defn update-project-map [project]
   (if (is-snapshot? project)
