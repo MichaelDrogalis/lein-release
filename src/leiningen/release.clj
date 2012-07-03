@@ -118,8 +118,7 @@
   (if (is-snapshot? project)
     (merge project
            {:version (get-release-version project)
-            :original-version (get-current-version project)
-            :jar-name (format "%s-%s" (:name project) (get-release-version project))})
+            :original-version (get-current-version project)})
     project))
 
 (defn update-project-file [project]
@@ -135,7 +134,7 @@
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
 (defn execute-task [task project]
-  (prn (format "applying %s to project at version %s with jar-name %s" task (:version project) (:jar-name project)))
+  (prn (format "applying %s to project at version %s" task (:version project)))
   (if (vector? task)
     (prn "haha")
     (main/apply-task (name task) project nil)))
