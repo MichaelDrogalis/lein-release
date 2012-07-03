@@ -109,7 +109,7 @@
    "deploy" #(sh! "lein" "deploy")})
 
 (defn execute-task [task project]
-  (prn (format "applying %s to project at version %s" task project))
+  (prn (format "applying %s to project at version %s" task (:version project)))
   (if (vector? task)
     (prn "!!Vectored tasks not yet supported!!")
     (if-let [cmd (predefined-cmds (name task))]
