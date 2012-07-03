@@ -106,13 +106,13 @@
        (.group m 1))))
 
 (defn is-snapshot? [project]
-  (.endsWith (:version project) "-SNAP"))
+  (.endsWith (:version project) "-SNAPSHOT"))
 
 (defn get-current-version [project]
   (:version project))
 
 (defn get-release-version [project]
-  (.replaceAll (get-current-version project) "-SNAP" ""))
+  (.replaceAll (get-current-version project) "-SNAPSHOT" ""))
 
 (defn update-project-map [project]
   (if (is-snapshot? project)
