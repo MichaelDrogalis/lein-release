@@ -106,7 +106,9 @@
 (def predefined-cmds
   {"install" #(sh! "lein" "install")
    "clojars" #(sh! "scp" "pom.xml" jar-name (:clojars-url config))
-   "deploy" #(sh! "lein" "deploy")})
+   "deploy" #(sh! "lein" "deploy")
+   "jar" #(sh! "lein" "jar")
+   "pom" #(sh! "lein" "pom")})
 
 (defn execute-task [task project]
   (prn (format "applying %s to project at version %s" task (:version project)))
