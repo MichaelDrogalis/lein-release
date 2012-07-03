@@ -11,6 +11,7 @@
   (throw (RuntimeException. (apply format fmt args))))
 
 (def ^:dynamic config {})
+(def ^:dynamic jar-name "")
 
 (def default-config {:release-tasks [:jar :pom :install]})
 
@@ -64,37 +65,6 @@
 (defn set-project-version! [old-vstring new-vstring]
   (spit "project.clj" (replace-project-version old-vstring new-vstring)))
 
-(defn detect-remote-deployment-strategy [project]
-  (cond
-    (:deploy-via config)
-    (:deploy-via config)
-
-    (:repositories project)
-    :lein-deploy
-
-    :else
-    (raise "Unable to determine deployment strategy. Please add repositories to your projects configuration or specify :deploy-via")))
-
-(defn detect-deployment-strategy [mode project]
-  (case mode
-    :remote (detect-remote-deployment-strategy project)
-    :lein-install)
-  )
-
-(defn perform-deploy! [mode project project-jar]
-  (case (detect-deployment-strategy mode project)
-
-    :lein-deploy
-    (sh! "lein" "deploy")
-
-    :lein-install
-    (sh! "lein" "install")
-
-    :clojars
-    (sh! "scp" "pom.xml" project-jar "clojars@clojars.org:")
-
-    (raise "Error: unrecognized deploy strategy: %s" (detect-deployment-strategy))))
-
 (defn extract-project-version-from-file
   ([]
      (extract-project-version-from-file "project.clj"))
@@ -118,8 +88,7 @@
   (if (is-snapshot? project)
     (merge project
            {:version (get-release-version project)
-            :original-version (get-current-version project)
-            :leiningen.jar/jar-name "theJar"})
+            :original-version (get-current-version project)})
     project))
 
 (defn update-project-file [project]
@@ -134,31 +103,38 @@
     (scm! :commit "-am" (format "lein-release plugin: preparing %s release" release-version))
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
+(def predefined-cmds
+  {"install" #(sh! "lein" "install")
+   "clojars" #(sh! "scp" "pom.xml" jar-name "clojars@clojars.org:")
+   "deploy" #(sh! "lein" "deploy")})
+
 (defn execute-task [task project]
   (prn (format "applying %s to project at version %s" task project))
   (if (vector? task)
-    (prn "haha")
-    (main/apply-task (name task) project nil)))
+    (prn "!!Vectored tasks not yet supported!!")
+    (if-let [cmd (predefined-cmds (name task))]
+      (cmd)
+      (main/apply-task (name task) project nil))))
 
 (defn execute-tasks [tasks project]  
   (doall
    (for [task tasks]
      (execute-task task project))))
 
-(defn release [project-orig & args]
-  (binding [config (merge default-config (:lein-release project-orig))]
-    (let [project (update-project-map project-orig)
-          release-version  (get-release-version project-orig)
-          next-dev-version (compute-next-development-version release-version)  
-          jar-file-name    (format "target/%s-%s.jar" (:name project-orig) release-version)]
-
+(defn release [project-orig & args]  
+  (let [project (update-project-map project-orig)
+        release-version  (get-release-version project-orig)
+        next-dev-version (compute-next-development-version release-version)]
+    (binding [config (merge default-config (:lein-release project-orig))
+              jar-name (format "target/%s-%s.jar" (:name project-orig) release-version)]
+(prn (format "%s" project))
       (when (:original-version project)
         (update-project-file project)
         (tag project))
- 
+      
       (execute-tasks (:release-tasks config) project)
       
-;      (perform-deploy! (:mode args-map) project jar-file-name)
+      ;(perform-deploy! (:mode args-map) project jar-file-name)
       
       (println (format "updating version %s => %s for next dev cycle" release-version next-dev-version))
       (set-project-version! release-version next-dev-version)
