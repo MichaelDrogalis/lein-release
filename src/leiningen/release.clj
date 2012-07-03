@@ -119,7 +119,7 @@
     (merge project
            {:version (get-release-version project)
             :original-version (get-current-version project)
-            :jar-name "theJar"})
+            :leiningen.jar/jar-name "theJar"})
     project))
 
 (defn update-project-file [project]
