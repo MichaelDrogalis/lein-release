@@ -108,7 +108,10 @@
    "clojars" #(sh! "scp" "pom.xml" jar-name (:clojars-url config))
    "deploy" #(sh! "lein" "deploy")
    "jar" #(sh! "lein" "jar")
-   "pom" #(sh! "lein" "pom")})
+   "pom" #(sh! "lein" "pom")
+   "uberjar" #(sh! "lein" "uberjar")
+   "embongo" #(sh! "lein" "embongo" "test")
+   "rpm" #(sh! "lein" "rpm")})
 
 (defn execute-task [task project]
   (prn (format "applying %s to project at version %s" task (:version project)))
