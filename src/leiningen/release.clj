@@ -10,7 +10,7 @@
 (defn raise [fmt & args]
   (throw (RuntimeException. (apply format fmt args))))
 
-(def ^:dynamic config {})
+(def ^:dynamic config {:clojars-url "clojars@clojars.org:"})
 (def ^:dynamic jar-name "")
 
 (def default-config {:release-tasks [:jar :pom :install]})
@@ -105,7 +105,7 @@
 
 (def predefined-cmds
   {"install" #(sh! "lein" "install")
-   "clojars" #(sh! "scp" "pom.xml" jar-name "clojars@clojars.org:")
+   "clojars" #(sh! "scp" "pom.xml" jar-name (:clojars-url config))
    "deploy" #(sh! "lein" "deploy")})
 
 (defn execute-task [task project]
@@ -127,7 +127,7 @@
         next-dev-version (compute-next-development-version release-version)]
     (binding [config (merge default-config (:lein-release project-orig))
               jar-name (format "target/%s-%s.jar" (:name project-orig) release-version)]
-(prn (format "%s" project))
+
       (when (:original-version project)
         (update-project-file project)
         (tag project))
