@@ -31,7 +31,8 @@
 
 (defn sh! [& args]
   (let [res (apply sh/sh args)]
-    (.println System/err (:err res))
+    (when [{:keys [err]}]
+      (.println System/err err))
     (when-not (zero? (:exit res))
       (raise "Error: command failed %s => %s" args res))))
 
