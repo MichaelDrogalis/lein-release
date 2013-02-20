@@ -91,12 +91,12 @@
 (defn update-project-file [project]
   (let [original-version (:original-version project)
         release-version  (:version project)]
-    (prn (format "setting project version %s => %s" original-version release-version))
+    (println (format "setting project version %s => %s" original-version release-version))
     (set-project-version! original-version release-version)))
 
 (defn tag [project]
   (let [release-version (:version project)]
-    (prn "adding, committing and tagging project.clj")
+    (println "adding, committing and tagging project.clj")
     (scm! :commit "-am" (format "lein-release plugin: preparing %s release" release-version))
     (scm! :tag (format "%s-%s" (:name project) release-version))))
 
