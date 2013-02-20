@@ -30,10 +30,10 @@
      (raise "Error: no scm detected! (I know only about git for now)."))))
 
 (defn sh! [& args]
-  (let [res (apply sh/sh args)]
-    (when [{:keys [err]}]
+  (let [{:keys [err exit] :as res} (apply sh/sh args)]
+    (when err
       (.println System/err err))
-    (when-not (zero? (:exit res))
+    (when-not (zero? exit)
       (raise "Error: command failed %s => %s" args res))))
 
 (defn scm! [cmd & args]
