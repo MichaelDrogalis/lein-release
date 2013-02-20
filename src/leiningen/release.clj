@@ -1,11 +1,9 @@
 (ns leiningen.release
-  "The release plug-in automatically manages your project’s version and deploys the built artifact for you."
-  (:require
-   [clojure.java.shell  :as sh]
-   [clojure.string      :as string]
-   [leiningen.core.main :as main :only [apply-task]])
-  (:import
-   [java.util.regex Pattern]))
+  "Automatically bump your project's semantic version at release-time."
+  (:require [clojure.java.shell :as sh]
+            [clojure.string :as string]
+            [leiningen.core.main :refer [apply-task]])
+  (:import [java.util.regex Pattern]))
 
 (defn raise [fmt & args]
   (throw (RuntimeException. (apply format fmt args))))
@@ -119,7 +117,7 @@
     (prn "!!Vectored tasks not yet supported!!")
     (if-let [cmd (predefined-cmds (name task))]
       (cmd)
-      (main/apply-task (name task) project nil))))
+      (apply-task (name task) project nil))))
 
 (defn execute-tasks [tasks project]  
   (doall
@@ -132,17 +130,14 @@
         next-dev-version (compute-next-development-version release-version)]
     (binding [config (merge default-config (:lein-release project-orig))
               jar-name (format "target/%s-%s.jar" (:name project-orig) release-version)]
-
       (when (:original-version project)
         (update-project-file project)
         (tag project))
-      
       (execute-tasks (:release-tasks config) project)
-      
-      ;(perform-deploy! (:mode args-map) project jar-file-name)
-      
       (println (format "updating version %s => %s for next dev cycle" release-version next-dev-version))
       (set-project-version! release-version next-dev-version)
       (scm! :add "project.clj")
-      (scm! :commit "-m" (format "lein-release plugin: bumped version from %s to %s for next development cycle" release-version next-dev-version)
-      ))))
+      (scm! :commit "-m"
+            (format "lein-release plugin: bumped version from %s to %s for next development cycle"
+                    release-version next-dev-version)))))
+
